@@ -87,12 +87,10 @@
   <div class="row"><label>Channel Name</label><input id="cfg-channel" placeholder="your_twitch_username" /></div>
   <div class="row"><label>User Access Token</label><input id="cfg-oauth" placeholder="your token (no oauth: prefix needed)" type="password" /></div>
   <div class="row"><label>Reward Title</label><input id="cfg-reward" placeholder="CS2 Hot Take" /></div>
-  <div class="row"><label>Worker URL</label><input id="cfg-worker" placeholder="https://hottake.yourname.workers.dev" /></div>
   <button onclick="saveConfig()">SAVE & CONNECT</button>
   <div class="hint">
     Token needs chat:read + channel:read:redemptions scope.<br>
     Get one free at twitchtokengenerator.com — paste the token directly, no oauth: prefix.<br>
-    Worker URL is your Cloudflare workers.dev endpoint.<br>
     Credentials stored in URL hash — bookmark after saving, use that URL in OBS.
   </div>
   <div class="status info" id="setup-status"></div>
@@ -122,10 +120,10 @@ function saveConfig() {
     channel: document.getElementById('cfg-channel').value.trim().toLowerCase(),
     oauth:   token,
     reward:  document.getElementById('cfg-reward').value.trim() || 'CS2 Hot Take',
-    worker:  document.getElementById('cfg-worker').value.trim().replace(/\/$/, ''),
+    worker:  'https://hottakewidget.kenneth-lang02.workers.dev',
   };
-  if (!cfg.channel || !cfg.oauth || !cfg.worker) {
-    setSetupStatus('Fill in all fields.', 'err'); return;
+  if (!cfg.channel || !cfg.oauth) {
+    setSetupStatus('Fill in channel and token.', 'err'); return;
   }
   location.hash = encodeURIComponent(JSON.stringify(cfg));
   setSetupStatus('Saved! Connecting...', 'ok');
@@ -282,14 +280,14 @@ function init() { connectEventSub(); }
 // Boot
 cfg = parseHash();
 if (cfg.oauth && cfg.oauth.startsWith('oauth:')) cfg.oauth = cfg.oauth.slice(6);
+cfg.worker = 'https://hottakewidget.kenneth-lang02.workers.dev';
 
-if (!cfg.channel || !cfg.oauth || !cfg.worker) {
+if (!cfg.channel || !cfg.oauth) {
   document.getElementById('setup').style.display = 'block';
   document.getElementById('live-status').textContent = '● SETUP REQUIRED';
   if (cfg.channel) document.getElementById('cfg-channel').value = cfg.channel;
   if (cfg.oauth)   document.getElementById('cfg-oauth').value   = cfg.oauth;
   if (cfg.reward)  document.getElementById('cfg-reward').value  = cfg.reward;
-  if (cfg.worker)  document.getElementById('cfg-worker').value  = cfg.worker;
 } else {
   init();
 }
